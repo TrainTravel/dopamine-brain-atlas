@@ -1,0 +1,9 @@
+pandas
+numpy
+scipy
+nibabel
+nilearn
+onnxruntime
+tokenizers
+snowballstemmer
+pytest

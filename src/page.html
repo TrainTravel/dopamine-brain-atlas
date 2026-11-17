@@ -1,0 +1,149 @@
+<title>Dopamine Disorder Atlas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: one-screen atlas. Controls left, 3D brain centre, evidence right; stacks to one column on phones. */
+:root{
+  --bg:#f3f4f8; --panel:#ffffff; --fg:#161924; --muted:#5a6173; --line:#dcdfe8; --chip:#eceef4;
+  --asd:#2563eb; --ad:#9333ea; --pd:#e11d48; --adhd:#0d8f84; --da:#a35600;
+  --node:#3c4254; --cortex:#8e94a6; --cool:#5b7a9d;
+  --display:"Space Grotesk","Inter",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c0e14; --panel:#141722; --fg:#e7e9f1; --muted:#9aa1b4; --line:#272b3a; --chip:#1d2130;
+  --asd:#5b9bff; --ad:#c08bff; --pd:#ff6b88; --adhd:#2dd4bf; --da:#f5b942;
+  --node:#c9cee0; --cortex:#aab0c4; --cool:#7fa3cc; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c0e14; --panel:#141722; --fg:#e7e9f1; --muted:#9aa1b4; --line:#272b3a; --chip:#1d2130;
+  --asd:#5b9bff; --ad:#c08bff; --pd:#ff6b88; --adhd:#2dd4bf; --da:#f5b942;
+  --node:#c9cee0; --cortex:#aab0c4; --cool:#7fa3cc; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.45}
+*{box-sizing:border-box}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--da);outline-offset:2px}
+.app{height:100%;display:grid;grid-template-rows:auto 1fr;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px;gap:12px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
+h1{font-family:var(--display);font-weight:600;font-size:20px;margin:0;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);font-size:13px}
+#sform{flex:1 1 100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-top:6px}
+#q{flex:1 1 260px;min-width:0;max-width:640px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 10px}
+#sgo{padding:7px 14px;font-weight:500}
+#semrow{padding:0;font-size:13px}
+#sstatus{flex:1 1 200px;min-width:0}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#results .miss{border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:6px}
+.main{display:grid;grid-template-columns:270px minmax(0,1fr) 360px;gap:12px;min-height:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow-y:auto;min-width:0;min-height:0}
+.sec{padding:14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.sec:last-child{border-bottom:0}
+h2{font-family:var(--display);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:0}
+h3{font-family:var(--display);font-size:17px;font-weight:600;margin:0;text-wrap:balance}
+.row{display:flex;align-items:center;gap:8px;cursor:pointer;padding:3px 0}
+.row input{margin:0;accent-color:var(--fg);flex:none}
+.sw{width:10px;height:10px;border-radius:50%;flex:none}
+.row .nm{flex:1;min-width:0}
+.row .ct,.num{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px}
+.row small{display:block;color:var(--muted);font-size:11.5px;line-height:1.3}
+.seg{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.seg button{background:var(--chip);border:1px solid transparent;border-radius:6px;padding:6px 0;cursor:pointer;font-weight:500;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--da);color:var(--panel);font-weight:600}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+.note b{color:var(--fg);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--da)}
+.btn{background:var(--chip);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12.5px}
+.stage{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-height:0;min-width:0;touch-action:none}
+.stage canvas{display:block;width:100%;height:100%}
+.lbl{position:absolute;left:0;top:0;font:500 10.5px var(--mono);color:var(--fg);pointer-events:none;white-space:nowrap;text-shadow:0 0 3px var(--panel),0 0 3px var(--panel),0 0 3px var(--panel);will-change:transform}
+.tip{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--muted);pointer-events:none}
+.orient{position:absolute;right:12px;bottom:10px;font:11px var(--mono);color:var(--muted);pointer-events:none}
+.views{position:absolute;left:10px;top:10px;display:flex;gap:4px;flex-wrap:wrap}
+.hover{position:absolute;pointer-events:none;background:var(--fg);color:var(--panel);font-size:12px;padding:3px 7px;border-radius:5px;white-space:nowrap}
+.err{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
+table.mx{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}
+.mx th{font-weight:500;color:var(--muted);padding:3px 2px;text-align:center;font-size:11px}
+.mx th:first-child,.mx td:first-child{text-align:left}
+.mx td{padding:1px}
+.mx td button{width:100%;border:0;background:none;padding:4px 2px;border-radius:4px;cursor:pointer;text-align:center}
+.mx td:first-child button{text-align:left;font-weight:500}
+.mx td button.sig{font-weight:600;box-shadow:inset 0 0 0 1px var(--fg)}
+.mx tr.on td:first-child button{color:var(--da)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:12.5px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.mono{font-family:var(--mono);font-size:12px}
+.bar{display:grid;grid-template-columns:74px 1fr 92px;align-items:center;gap:8px;font-size:12px}
+.track{position:relative;height:10px;background:var(--chip);border-radius:3px}
+.fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px}
+.tick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--fg)}
+.dots{display:inline-flex;gap:3px;vertical-align:middle}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--chip);border:1px solid var(--line)}
+.dots i.f{background:var(--da);border-color:var(--da)}
+.rx{display:grid;grid-template-columns:28px auto 1fr;gap:4px 8px;align-items:center;font-size:12.5px}
+.rx span:last-child{color:var(--muted);font-size:11.5px}
+ul.st{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;max-height:420px;overflow-y:auto}
+ul.st li{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;border-radius:6px}
+ul.st button{background:none;border:0;text-align:left;padding:6px;cursor:pointer;border-radius:6px;min-width:0}
+ul.st button:hover,ul.st li.on button{background:var(--chip)}
+ul.st .t{display:block;font-size:12.5px;line-height:1.3}
+ul.st .m{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+ul.st a,.sec a{color:var(--fg);font-size:12px}
+ul.st a{padding:6px 4px;white-space:nowrap}
+.gd{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:3px}
+.dis{display:flex;flex-direction:column;gap:8px}
+.dis p{margin:0;font-size:12.5px;color:var(--muted)}
+.dis b{color:var(--fg)}
+@media (max-width:1000px){
+  html,body{height:auto}
+  .app{height:auto}
+  .main{grid-template-columns:1fr}
+  .stage{height:min(68vh,520px);order:-1}
+  .panel{overflow:visible}
+}
+</style>
+
+<div class="app">
+  <header>
+    <h1>Dopamine Disorder Atlas</h1>
+    <p id="sub"></p>
+    <form id="sform" role="search" hidden>
+      <label class="vh" for="q">Search fMRI studies</label>
+      <input id="q" type="search" autocomplete="off" maxlength="300" placeholder="Search studies in plain language, e.g. mindful practices for ADHD kids">
+      <button class="btn" type="submit" id="sgo">Search</button>
+      <label class="row" id="semrow"><input type="checkbox" id="sem" checked><span>Match by meaning</span></label>
+      <span class="note" id="sstatus" role="status" aria-live="polite"></span>
+    </form>
+  </header>
+  <div class="main">
+    <div class="panel" id="left">
+      <div class="sec"><h2>fMRI study layers</h2><div id="layers"></div>
+        <label class="row"><input type="checkbox" id="near" checked><span class="nm">Only peaks within 10 mm of a mapped region<small>Untick to show every peak across the brain</small></span></label>
+        <p class="note">Each dot is one reported activation peak (MNI space). Click a dot to open its study.</p></div>
+      <div class="sec"><h2>Dopamine pathways</h2><div id="paths"></div></div>
+      <div class="sec"><h2>Receptor density</h2>
+        <div class="seg" id="rseg"></div><p class="note" id="rnote"></p></div>
+      <div class="sec"><h2>View</h2>
+        <label class="note" for="op">Cortex opacity</label><input type="range" id="op" min="0" max="60" value="16">
+        <label class="row"><input type="checkbox" id="hideL"><span class="nm">Hide left hemisphere</span></label>
+        <label class="row"><input type="checkbox" id="lab" checked><span class="nm">Region labels</span></label>
+      </div>
+    </div>
+    <div class="stage" id="stage">
+      <div class="views"><button class="btn" data-v="lat">Right side</button><button class="btn" data-v="top">Top</button><button class="btn" data-v="front">Front</button></div>
+      <div class="tip">Drag to rotate, scroll or pinch to zoom, click a region or dot</div>
+      <div class="orient" id="orient"></div>
+      <div class="hover" id="hover" hidden></div>
+    </div>
+    <div class="panel" id="right">
+      <div class="sec" id="results" hidden></div>
+      <div class="sec" id="detail" hidden></div>
+      <div class="sec"><h2>Where each study set concentrates</h2>
+        <p class="note">Share of studies reporting a peak within 10&nbsp;mm of each region, relative to all <span id="tot"></span> Neurosynth studies. 1.0 means no different from the literature at large. Outlined cells differ at p&nbsp;&lt;&nbsp;0.05 (Fisher exact, uncorrected).</p>
+        <div style="overflow-x:auto"><table class="mx" id="mx"></table></div></div>
+      <div class="sec"><h2>Dopamine links by disorder</h2><div class="dis" id="dis"></div>
+        <p class="note">Background summary from the general literature, not derived from the plotted data.</p></div>
+      <div class="sec"><h2>Data and limits</h2>
+        <p class="note">Peaks and study metadata come from the open <a href="https://github.com/neurosynth/neurosynth-data" target="_blank" rel="noopener">Neurosynth v7 database</a> (14,371 fMRI papers, 507,891 peaks). A paper joins a layer when its abstract uses that layer's terms (tf-idf above 0.001), so a peak may come from patients, controls or a group contrast in either direction. Region centres are approximate MNI coordinates. Receptor densities are qualitative ratings (0 to 3) summarising autoradiography, PET and mRNA reports. Pathway curves are schematic. Use this for exploration and hypothesis generation, not for diagnosis.</p></div>
+    </div>
+  </div>
+</div>

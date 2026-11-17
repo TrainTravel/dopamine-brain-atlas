@@ -1,0 +1,16 @@
+{
+  "name": "dopamine-disorder-atlas",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "test:site": "node --test tests/site.test.js",
+    "test:core": "node --test tests/search-core.test.js"
+  },
+  "dependencies": {
+    "three": "0.128.0",
+    "onnxruntime-web": "1.31.1"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
